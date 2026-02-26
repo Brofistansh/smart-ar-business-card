@@ -2,67 +2,215 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>AR Business Card</title>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AR Business Card – Ansh Jaiswal</title>
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-
   <style>
-    body { margin: 0; overflow: hidden; }
+    body { margin: 0; overflow: hidden; font-family: sans-serif; }
+
+    /* Scanning overlay shown before target is found */
+    #scan-hint {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.65);
+      color: #fff;
+      padding: 10px 22px;
+      border-radius: 30px;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      pointer-events: none;
+      z-index: 999;
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,0.15);
+      transition: opacity 0.5s ease;
+    }
+    #scan-hint.hidden { opacity: 0; }
+
+    /* Scanning animation border */
+    #scan-hint::before {
+      content: '📷 ';
+    }
   </style>
 </head>
-
 <body>
-<a-scene
-  mindar-image="imageTargetSrc: targets.mind;"
-  embedded
-  vr-mode-ui="enabled: false"
-  device-orientation-permission-ui="enabled: false">
 
-  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+  <div id="scan-hint">Point camera at Ansh's business card</div>
 
-  <a-entity mindar-image-target="targetIndex: 0">
+  <a-scene
+    mindar-image="imageTargetSrc: targets.mind; autoStart: true; uiLoading: yes; uiError: yes; uiScanning: yes;"
+    color-space="sRGB"
+    renderer="colorManagement: true; physicallyCorrectLights: true"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false">
 
-    <!-- NAME -->
-    <a-text
-      value="Ansh Jaiswal"
-      color="#00FFD1"
-      align="center"
-      width="3"
-      position="0 0.4 0">
-    </a-text>
+    <!-- Assets -->
+    <a-assets></a-assets>
 
-    <!-- CALL -->
-    <a-plane
-      position="-0.6 -0.2 0"
-      width="0.6"
-      height="0.25"
-      color="#000"
-      onclick="window.location.href='tel:+918218049120'">
-      <a-text value="Call" align="center" position="0 0 0.01" color="#fff"></a-text>
-    </a-plane>
+    <!--
+      CAMERA with cursor for click/tap detection on A-Frame objects.
+      The raycaster targets elements with class="clickable"
+    -->
+    <a-camera
+      position="0 0 0"
+      look-controls="enabled: false"
+      cursor="fuse: false; rayOrigin: mouse;"
+      raycaster="objects: .clickable; far: 10">
+    </a-camera>
 
-    <!-- WHATSAPP -->
-    <a-plane
-      position="0 -0.2 0"
-      width="0.9"
-      height="0.25"
-      color="#25D366"
-      onclick="window.location.href='https://wa.me/918218049120'">
-      <a-text value="WhatsApp" align="center" position="0 0 0.01" color="#fff"></a-text>
-    </a-plane>
+    <!-- AR content anchored to the tracked image target -->
+    <a-entity mindar-image-target="targetIndex: 0">
 
-    <!-- LINKEDIN -->
-    <a-plane
-      position="0.7 -0.2 0"
-      width="0.9"
-      height="0.25"
-      color="#0077B5"
-      onclick="window.location.href='https://www.linkedin.com/in/ansh-jaiswal-aa766a255/'">
-      <a-text value="LinkedIn" align="center" position="0 0 0.01" color="#fff"></a-text>
-    </a-plane>
+      <!-- 
+        Everything is positioned relative to the tracked image.
+        X: left/right | Y: up/down | Z: forward (positive = toward camera)
+        The tracked image is roughly 1 unit wide by default.
+      -->
 
-  </a-entity>
-</a-scene>
+      <!-- BACKGROUND CARD PANEL -->
+      <a-plane
+        position="0 0 -0.01"
+        width="2.2"
+        height="1.4"
+        color="#0a0a12"
+        opacity="0.88"
+        material="transparent: true; opacity: 0.88">
+      </a-plane>
+
+      <!-- GOLD TOP ACCENT LINE -->
+      <a-plane
+        position="0 0.63 0"
+        width="2.2"
+        height="0.04"
+        color="#b89b6a">
+      </a-plane>
+
+      <!-- NAME -->
+      <a-text
+        value="Ansh Jaiswal"
+        color="#f7f3ee"
+        align="center"
+        width="3.5"
+        font="https://cdn.aframe.io/fonts/Exo2Bold.fnt"
+        position="0 0.38 0.01">
+      </a-text>
+
+      <!-- ROLE / SUBTITLE -->
+      <a-text
+        value="AR Developer  &  Tech Consultant"
+        color="#b89b6a"
+        align="center"
+        width="2.6"
+        position="0 0.18 0.01">
+      </a-text>
+
+      <!-- DIVIDER LINE -->
+      <a-plane
+        position="0 0.04 0.01"
+        width="1.6"
+        height="0.008"
+        color="#b89b6a"
+        opacity="0.4"
+        material="transparent: true; opacity: 0.4">
+      </a-plane>
+
+      <!-- ── BUTTON ROW ── -->
+      <!-- Evenly spaced: left=-0.72, center=0, right=0.72 -->
+
+      <!-- CALL BUTTON -->
+      <a-plane
+        class="clickable"
+        position="-0.72 -0.22 0.01"
+        width="0.6"
+        height="0.28"
+        color="#1c1a17"
+        material="shader: flat"
+        data-action="call"
+        id="btn-call">
+        <a-text value="📞 Call" align="center" position="0 0.03 0.01" color="#00ffd1" width="1.6"></a-text>
+        <a-text value="+91 82180 49120" align="center" position="0 -0.05 0.01" color="#aaa" width="1.1"></a-text>
+      </a-plane>
+
+      <!-- WHATSAPP BUTTON -->
+      <a-plane
+        class="clickable"
+        position="0 -0.22 0.01"
+        width="0.6"
+        height="0.28"
+        color="#075e54"
+        material="shader: flat"
+        data-action="whatsapp"
+        id="btn-wa">
+        <a-text value="💬 WhatsApp" align="center" position="0 0.03 0.01" color="#25D366" width="1.6"></a-text>
+        <a-text value="Message Now" align="center" position="0 -0.05 0.01" color="#aaa" width="1.1"></a-text>
+      </a-plane>
+
+      <!-- LINKEDIN BUTTON -->
+      <a-plane
+        class="clickable"
+        position="0.72 -0.22 0.01"
+        width="0.6"
+        height="0.28"
+        color="#003d5c"
+        material="shader: flat"
+        data-action="linkedin"
+        id="btn-li">
+        <a-text value="🔗 LinkedIn" align="center" position="0 0.03 0.01" color="#0e9ad6" width="1.6"></a-text>
+        <a-text value="View Profile" align="center" position="0 -0.05 0.01" color="#aaa" width="1.1"></a-text>
+      </a-plane>
+
+      <!-- BOTTOM LABEL -->
+      <a-text
+        value="TAP A BUTTON TO CONNECT"
+        color="#555"
+        align="center"
+        width="1.8"
+        position="0 -0.53 0.01">
+      </a-text>
+
+    </a-entity>
+  </a-scene>
+
+  <script>
+    // ── Hide scan hint once target is found ──
+    const scene = document.querySelector('a-scene');
+    const hint = document.getElementById('scan-hint');
+
+    scene.addEventListener('targetFound', () => {
+      hint.classList.add('hidden');
+    });
+    scene.addEventListener('targetLost', () => {
+      hint.classList.remove('hidden');
+    });
+
+    // ── Button click actions ──
+    // A-Frame cursor fires 'click' events on .clickable elements
+    const actions = {
+      call:     () => window.location.href = 'tel:+918218049120',
+      whatsapp: () => window.open('https://wa.me/918218049120', '_blank'),
+      linkedin: () => window.open('https://www.linkedin.com/in/ansh-jaiswal-aa766a255/', '_blank'),
+    };
+
+    // Attach to each button plane
+    ['btn-call', 'btn-wa', 'btn-li'].forEach(id => {
+      const el = document.getElementById(id);
+      el.addEventListener('click', () => {
+        const action = el.getAttribute('data-action');
+        if (actions[action]) actions[action]();
+      });
+
+      // Hover highlight effect
+      el.addEventListener('mouseenter', () => {
+        el.setAttribute('scale', '1.06 1.06 1.06');
+        el.setAttribute('opacity', '1');
+      });
+      el.addEventListener('mouseleave', () => {
+        el.setAttribute('scale', '1 1 1');
+      });
+    });
+  </script>
+
 </body>
 </html>
